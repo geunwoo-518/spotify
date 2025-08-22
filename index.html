@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spotify</title>
+  <link rel="icon" href="img/favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sooheon/pretendard/dist/web/static/pretendard.css" />
+
+  <style>
+    html, body {
+      margin: 0; padding: 0; max-width: 100%; overflow-x: hidden;
+      background-color: #121212;
+      scroll-behavior: smooth;
+      font-family: sans-serif;
+    }
+    #section-home {
+      position: relative;
+      height: 2100px;
+    }
+    /* 고양이 애니메이션 */
+    .beat-animation-wrapper {
+      width: 255.75px;
+      position: absolute;
+      top: 370px;
+      left: -280px;
+      z-index: 10;
+    }
+    .beat-animation {
+      width: 255.75px;
+      height: 356px;
+      background-image: url('img/Beat.png');
+      background-repeat: no-repeat;
+      background-position: 0 0;
+      background-size: cover;
+      animation: playBeat 1s steps(12) infinite;
+      display: inline-block;
+    }
+    @keyframes playBeat {
+      from { background-position: 0 0; }
+      to   { background-position: -3069px 0; }
+    }
+    /* 내비게이션 */
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background-color: #000;
+      width: 100%;
+      box-sizing: border-box;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+    }
+    .logo {
+      width: 140px; height: 44px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative; z-index: 1;
+      background-image: url('img/nav_02.png');
+      background-repeat: no-repeat;
+      background-size: contain;
+    }
+    .logo:hover {
+      transform: scale(1.1);
+      opacity: 0.8;
+      z-index: 10;
+      background-image: url('img/nav_hover_02.png');
+    }
+    .logo.active {
+      background-image: url('img/nav_hover_02.png');
+    }
+    .menu-images {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6vw;
+      align-items: center;
+      margin-left: auto;
+      margin-right: -10px;
+    }
+    .menu-images > button {
+      position: relative;
+      border: none;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .menu-playlist { width: 73px; height: 18px; }
+    .menu-music { width: 51px; height: 16px; }
+    .menu-artist { width: 58px; height: 16px; }
+    .menu-podcasts { width: 83px; height: 16px; }
+    .menu-community { width: 95px; height: 16px; }
+    .menu-menuba { width: 36px; height: 18px; margin-right: 0; }
+
+    .menu-images > button .default-img,
+    .menu-images > button .hover-img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: center;
+      transition: opacity 0.3s ease;
+    }
+
+    .menu-images > button .hover-img { opacity: 0; }
+    .menu-images > button:hover .hover-img { opacity: 1; }
+    .menu-images > button:hover .default-img { opacity: 0; }
+    .menu-images > button.active .hover-img { opacity: 1; }
+    .menu-images > button.active .default-img { opacity: 0; }
+
+    section {
+      height: 1200px;
+      padding: 0 20px 0 20px;
+      color: white;
+      margin-top: 90px;
+      scroll-margin-top: 70px;
+      background: #121212;
+    }
+    @media (max-width: 900px) {
+      nav { flex-direction: column; align-items: center; }
+      .logo { margin-bottom: 20px; width: 140px; }
+      .menu-images { justify-content: center; gap: 4vw; }
+    }
+    /* 구독 결제 라인업 스타일 */
+    .subscription-lineup {
+      color: white;
+      font-weight: 700;
+      font-size: 50px;
+      text-align: center;
+      margin: 400px 0 20px 0;
+      user-select: none;
+    }
+    /* 캐로셀 스타일 */
+    .carousel-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 80px;
+      perspective: 1200px;
+      user-select: none;
+    }
+    #carousel {
+      position: relative;
+      width: 1200px;
+      height: 422px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform-style: preserve-3d;
+      transition: transform 0.7s ease;
+    }
+    .carousel-item {
+      position: absolute;
+      top: 0;
+      width: 402px;
+      height: 422px;
+      border-radius: 16px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+      cursor: pointer;
+      transition:
+        transform 0.7s ease,
+        opacity 0.7s ease,
+        filter 0.7s ease;
+      overflow: hidden;
+      user-select: none;
+    }
+    .carousel-item .default-img,
+    .carousel-item .hover-img {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-size: cover;
+      background-position: center;
+      border-radius: 16px;
+      transition: opacity 0.3s ease;
+    }
+    /* 호버 이미지 투명도 제대로 조절 */
+    .carousel-item .hover-img {
+      opacity: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .carousel-item:hover .hover-img {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .carousel-item .default-img {
+      opacity: 1;
+      z-index: 1;
+    }
+    .carousel-item:hover .default-img {
+      opacity: 0;
+    }
+    /* 위치별 상태 */
+    .carousel-item.active {
+      transform: translateX(0) translateZ(0) scale(1);
+      opacity: 1;
+      filter: none;
+      z-index: 10;
+      pointer-events: auto;
+    }
+    .carousel-item.left {
+      transform: translateX(-450px) translateZ(-300px) scale(0.5) rotateY(30deg);
+      opacity: 0.3;
+      filter: grayscale(70%);
+      z-index: 5;
+      pointer-events: auto;
+    }
+    .carousel-item.right {
+      transform: translateX(450px) translateZ(-300px) scale(0.5) rotateY(-30deg);
+      opacity: 0.3;
+      filter: grayscale(70%);
+      z-index: 5;
+      pointer-events: auto;
+    }
+    .carousel-item.hidden {
+      opacity: 0;
+      pointer-events: none;
+      z-index: 0;
+      transform: translateX(0) translateZ(-600px) scale(0);
+    }
+    #modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      display: flex;
+    }
+    #modal.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    #modal-content {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform: translateY(-80px);
+      opacity: 0;
+      transition: all 1s ease;
+    }
+    #modal.show #modal-content {
+      transform: translateY(0);
+      opacity: 1;
+      cursor: pointer;
+    }
+    #modal img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.7);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #close-modal:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+    .playlist-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4열 고정 */
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto 100px;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+.playlist-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+}
+.playlist-thumb {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: white;
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+.playlist-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0,0,0,0.3);
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+.playlist-thumb:hover {
+  transform: scale(1.05);
+}
+.playlist-thumb:hover::after {
+  opacity: 0;
+}
+.anton-regular {
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+  /* 반원형 캐로셀 스타일 - section-music용 */
+  .circle-carousel-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 60px;
+    position: relative;
+    height: 300px;
+  }
+
+  #circle-carousel {
+    position: relative;
+    width: 1280px;
+    height: 300px;
+  }
+
+  .circle-item {
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.5s ease, filter 0.3s ease;
+    cursor: pointer;
+  }
+
+  .circle-item .default-img,
+  .circle-item .hover-img {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 0.3s ease;
+  }
+
+  .circle-item .hover-img {
+    opacity: 0;
+  }
+
+  .circle-item:hover .hover-img {
+    opacity: 1;
+  }
+
+  .circle-item:hover .default-img {
+    opacity: 0;
+  }
+
+  .circle-item.center {
+    transform: translate(500px, 0px) scale(1.4) rotate(0deg) !important;
+    z-index: 3;
+  }
+  .artist-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 60px; /* 간격 넓힘 */
+  max-width: 1280px;
+  margin: 0 auto 100px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  justify-content: flex-start;
+}
+
+.artist-item {
+  width: 260px;
+  height: 180px; /* 높이 증가 */
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  margin-top: -30px;
+}
+
+.artist-item:hover {
+  transform: scale(1.05);
+}
+
+.artist-item .default-img,
+.artist-item .hover-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 0.3s ease;
+}
+
+.artist-item .hover-img {
+  opacity: 0;
+}
+
+.artist-item:hover .hover-img {
+  opacity: 1;
+}
+
+.artist-item:hover .default-img {
+  opacity: 0;
+}
+.featured-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 60px;
+  max-width: 1280px;
+  margin: 0 auto 100px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  justify-content: center;
+}
+
+.featured-item {
+  width: 370px;
+  color: white;
+  text-align: left;
+  transition: color 0.3s ease;
+  margin-top: -30px;
+}
+
+.featured-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: white;
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  position: relative;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.featured-thumb:hover {
+  transform: scale(1.05);
+}
+
+.featured-thumb .default-img,
+.featured-thumb .hover-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 0.3s ease;
+}
+
+.featured-thumb .hover-img {
+  opacity: 0;
+}
+
+.featured-thumb:hover .hover-img {
+  opacity: 1;
+}
+
+.featured-thumb:hover .default-img {
+  opacity: 0;
+}
+
+.featured-item h4 {
+  font-size: 22px;
+  margin: 8px 0 4px;
+  transition: color 0.3s ease;
+}
+
+.featured-item:hover h4 {
+  color: #00DB5A;
+}
+
+.featured-item p {
+  font-size: 15px;
+  color: #ccc;
+  margin: 0;
+}
+#section-podcasts h4,
+#section-podcasts p {
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+}
+/* COMMUNITY 섹션 채팅 UI용 */
+#section-community {
+  padding: 0;
+  margin: 0;
+}
+
+#chat-layout {
+  width: 100vw;
+  height: 800px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #121212;
+  gap: 60px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.chat-image {
+  width: 400px;
+  height: 640px;
+  background-color: white;
+  border-radius: 12px;
+
+  background-image: url('img/community_image.png'); /* 여기 이미지 경로 넣어주세요 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.chat-box {
+  flex-grow: 1;
+  max-width: 950px;
+  height: 640px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  font-weight: 500;
+}
+
+.chat-bubble {
+  background-color: #eee;
+  color: #000;
+  padding: 16px 24px;
+  border-radius: 36px;
+  max-width: 80%;
+  font-size: 18px;
+  align-self: flex-start;
+}
+
+.chat-bubble.user {
+  background-color: #3e00ff;
+  color: white;
+  align-self: flex-end;
+}
+
+.chat-input-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  border-radius: 9999px;
+  padding: 14px 28px;
+  margin: 10px;
+}
+
+.chat-input-area input {
+  border: none;
+  outline: none;
+  font-size: 18px;
+  flex-grow: 1;
+  background: transparent;
+}
+
+.chat-input-area button {
+  background: #4100F5;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+}
+#playlist-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 9999;
+}
+
+#playlist-modal.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.playlist-modal-content {
+  background: transparent;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 90vw;
+  max-height: 80vh;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+#playlist-modal.show .playlist-modal-content {
+  transform: scale(1);
+}
+
+#playlist-modal-img {
+  max-width: 90vw;  /* 화면 가로 90% 이내 */
+  max-height: 80vh; /* 화면 세로 80% 이내 */
+  object-fit: contain; /* 비율 유지하면서 맞춤 */
+  border-radius: 22px;
+  display: block;
+  margin: 0 auto;
+  background-color: #000;
+}
+
+#close-playlist-modal {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: #fff;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+  </style>
+</head>
+
+<body>
+  <nav>
+    <div class="logo" id="logo"></div>
+    <div class="menu-images">
+      <button class="menu-playlist" data-target="section-playlist" aria-label="플레이리스트">
+        <div class="default-img" style="background-image: url('img/nav_03.png');"></div>
+        <div class="hover-img" style="background-image: url('img/nav_hover_03.png');"></div>
+      </button>
+      <button class="menu-music" data-target="section-music" aria-label="뮤직">
+        <div class="default-img" style="background-image: url('img/nav_04.png');"></div>
+        <div class="hover-img" style="background-image: url('img/nav_hover_04.png');"></div>
+      </button>
+      <button class="menu-artist" data-target="section-artist" aria-label="아티스트">
+        <div class="default-img" style="background-image: url('img/nav_05.png');"></div>
+        <div class="hover-img" style="background-image: url('img/nav_hover_05.png');"></div>
+      </button>
+      <button class="menu-podcasts" data-target="section-podcasts" aria-label="팟캐스트">
+        <div class="default-img" style="background-image: url('img/nav_06.png');"></div>
+        <div class="hover-img" style="background-image: url('img/nav_hover_06.png');"></div>
+      </button>
+      <button class="menu-community" data-target="section-community" aria-label="커뮤니티">
+        <div class="default-img" style="background-image: url('img/nav_07.png');"></div>
+        <div class="hover-img" style="background-image: url('img/nav_hover_07.png');"></div>
+      </button>
+      <button class="menu-menuba" id="menu-menuba" aria-label="메뉴바">
+        <div class="default-img" style="background-image: url('img/nav_08.png');"></div>
+        <div class="hover-img" style="background-image: url('img/nav_hover_08.png');"></div>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 홈 섹션 -->
+  <section id="section-home">
+    <div style="max-width: 1280px; margin: 0 auto; padding: 40px 20px; box-sizing: border-box; position: relative;">
+      <iframe 
+        src="https://www.youtube.com/embed/Mhzm2f8p_oo"
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen 
+        style="width: 100%; height: 720px; border-radius: 16px; display: block; margin: 0 auto;">
+      </iframe>
+      <div class="beat-animation-wrapper">
+        <div class="beat-animation"></div>
+      </div>
+    </div>
+
+    <!-- 구독 결제 라인업 텍스트 -->
+    <h2 class="subscription-lineup">구독 결제 라인업</h2><br>
+
+    <!-- 캐로셀 -->
+    <div class="carousel-container">
+      <div id="carousel">
+        <div class="carousel-item active">
+          <div class="default-img" style="background-image: url('img/ca_01.png');"></div>
+          <div class="hover-img" style="background-image: url('img/ca_hover_1.png');"></div>
+        </div>
+        <div class="carousel-item right">
+          <div class="default-img" style="background-image: url('img/ca_02.png');"></div>
+          <div class="hover-img" style="background-image: url('img/ca_hover_2.png');"></div>
+        </div>
+        <div class="carousel-item left">
+          <div class="default-img" style="background-image: url('img/ca_03.png');"></div>
+          <div class="hover-img" style="background-image: url('img/ca_hover_3.png');"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 나머지 섹션들 -->
+  <section id="section-playlist">
+  <h1 class="anton-regular" style="font-size: 160px; color: white; margin-bottom: 60px;">Playlist</h1>
+
+  <div class="playlist-grid">
+    <div class="playlist-item">
+      <div class="playlist-thumb" data-index="1" style="background-image: url('img/playlist_1.jpg');"></div>
+    </div>
+    <div class="playlist-item">
+      <div class="playlist-thumb" data-index="2" style="background-image: url('img/playlist_2.jpg');"></div>
+    </div>
+    <div class="playlist-item">
+      <div class="playlist-thumb" data-index="3" style="background-image: url('img/playlist_3.jpg');"></div>
+    </div>
+    <div class="playlist-item">
+      <div class="playlist-thumb" data-index="4" style="background-image: url('img/playlist_4.jpg');"></div>
+    </div>
+    <div class="playlist-item">
+      <div class="playlist-thumb" data-index="5" style="background-image: url('img/playlist_5.jpg');"></div>
+    </div>
+    <div class="playlist-item">
+      <div class="playlist-thumb" data-index="6" style="background-image: url('img/playlist_6.jpg');"></div>
+    </div>
+    <div class="playlist-item">
+      <div class="playlist-thumb" data-index="7" style="background-image: url('img/playlist_7.jpg');"></div>
+    </div>
+    <div class="playlist-item">
+      <div class="playlist-thumb" data-index="8" style="background-image: url('img/playlist_8.jpg');"></div>
+    </div>
+  </div>
+</section>
+
+</section>
+</section>
+  <section id="section-music"><h1 class="anton-regular" style="font-size: 160px; color: white; margin-bottom: 60px;">MUSIC</h1>
+  <div class="circle-carousel-container">
+    <div id="circle-carousel">
+      <div class="circle-item" style="--angle:-40deg;">
+        <div class="default-img" style="background-image: url('img/music_-06.png');"></div>
+      <div class="hover-img" style="background-image: url('img/music_hover_-01.png');"></div>
+      </div>
+      <div class="circle-item" style="--angle:-20deg;">
+        <div class="default-img" style="background-image: url('img/music_-07.png');"></div>
+        <div class="hover-img" style="background-image: url('img/music_hover_-02.png');"></div>
+      </div>
+      <div class="circle-item" style="--angle:0deg;">
+        <div class="default-img" style="background-image: url('img/music_-08.png');"></div>
+        <div class="hover-img" style="background-image: url('img/music_hover_-03.png');"></div>
+      </div>
+      <div class="circle-item" style="--angle:20deg;">
+        <div class="default-img" style="background-image: url('img/music_-09.png');"></div>
+        <div class="hover-img" style="background-image: url('img/music_hover_-04.png');"></div>
+      </div>
+      <div class="circle-item" style="--angle:40deg;">
+        <div class="default-img" style="background-image: url('img/music_-10.png');"></div>
+        <div class="hover-img" style="background-image: url('img/music_hover_-05.png');"></div>
+      </div>
+    </div>
+  </div>
+
+  </section>
+  <section id="section-artist"><h1 class="anton-regular" style="font-size: 160px; color: white; margin-bottom: 60px;">ARTIST</h1>
+  <div class="artist-grid">
+    <!-- 12개 가로형 이미지 -->
+    <!-- 1~4 -->
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_1.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_01.png');"></div>
+    </div>
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_2.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_02.png');"></div>
+    </div>
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_3.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_03.png');"></div>
+    </div>
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_4.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_04.png');"></div>
+    </div>
+
+    <!-- 5~8 -->
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_5.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_05.png');"></div>
+    </div>
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_6.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_06.png');"></div>
+    </div>
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_7.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_07.png');"></div>
+    </div>
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_8.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_08.png');"></div>
+    </div>
+
+    <!-- 9~12 -->
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_9.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_09.png');"></div>
+    </div>
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_10.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_10.png');"></div>
+    </div>
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_11.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_11.png');"></div>
+    </div>
+    <div class="artist-item">
+      <div class="default-img" style="background-image: url('img/artist_12.png');"></div>
+      <div class="hover-img" style="background-image: url('img/artist_hover_12.png');"></div>
+    </div>
+  </div>
+  </section>
+  <section id="section-podcasts"><h1 class="anton-regular" style="font-size: 160px; color: white; margin-bottom: 60px;">PODCASTS</h1>
+      <div class="featured-grid">
+    <!-- 첫 줄 -->
+    <div class="featured-item">
+      <div class="featured-thumb">
+        <div class="default-img" style="background-image: url('img/podcasts_01.png');"></div>
+        <div class="hover-img" style="background-image: url('img/podcasts_hover_01.png');"></div>
+      </div>
+      <h4>컬투쇼 레전드 사연</h4>
+      <p>컬투쇼 레전드 사연 팟캐스트에 오신 것을 환영합니다.</p>
+    </div>
+    <div class="featured-item">
+      <div class="featured-thumb">
+        <div class="default-img" style="background-image: url('img/podcasts_02.png');"></div>
+        <div class="hover-img" style="background-image: url('img/podcasts_hover_02.png');"></div>
+      </div>
+      <h4>세상을 바꾸는 시간 15분</h4>
+      <p>배움과 성장이 필요한 순간, 세바시 팟캐스트는 당신의 곁에서 더 나은 미래를 위한 길을 밝혀줍니다.
+      지금 바로 세바시 팟캐스트와 함께 삶을 변화시키는 여정을 시작하세요.</p>
+    </div>
+    <div class="featured-item">
+      <div class="featured-thumb">
+        <div class="default-img" style="background-image: url('img/podcasts_03.png');"></div>
+        <div class="hover-img" style="background-image: url('img/podcasts_hover_03.png');"></div>
+      </div>
+      <h4>요즘 것들의 사생활</h4>
+      <p>매주 화요일 저녁 9시 업로드. 세상이 말하는 정답 말고 나다운 삶의 레퍼런스, 요즘 것들의 사생활. (a.k.a 요즘사)
+      유튜브에서 영상으로도 만나볼 수 있습니다.</p>
+    </div>
+
+    <!-- 둘째 줄 -->
+    <div class="featured-item">
+      <div class="featured-thumb">
+        <div class="default-img" style="background-image: url('img/podcasts_04.png');"></div>
+        <div class="hover-img" style="background-image: url('img/podcasts_hover_04.png');"></div>
+      </div>
+      <h4>TED Talks Daily</h4>
+      <p>Want TED Talks on the go? Everyday, this feed brings you our latest talks in audio format. </p>
+    </div>
+    <div class="featured-item">
+      <div class="featured-thumb">
+        <div class="default-img" style="background-image: url('img/podcasts_05.png');"></div>
+        <div class="hover-img" style="background-image: url('img/podcasts_hover_05.png');"></div>
+      </div>
+      <h4>The Joe Rogan Experience</h4>
+      <p>The official podcast of comedian Joe Rogan.</p>
+    </div>
+    <div class="featured-item">
+      <div class="featured-thumb">
+        <div class="default-img" style="background-image: url('img/podcasts_06.png');"></div>
+        <div class="hover-img" style="background-image: url('img/podcasts_hover_06.png');"></div>
+      </div>
+      <h4>The Diary Of A CEO with Steven Bartlett</h4>
+      <p>I decided to launch 'The Diary Of A CEO' podcast with the simple mission of providing an unfiltered journey into the remarkable stories and untold dimensions of the world's most influential people, experts and thinkers.</p>
+    </div>
+  </div> 
+  </section>
+  <section id="section-community"><h1 class="anton-regular" style="font-size: 160px; color: white; margin-bottom: 60px;">COMMUNITY</h1>
+    <!-- 채팅 UI 박스 -->
+<div id="chat-layout">
+  <div class="chat-image"></div>
+  <div class="chat-box">
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-bubble">최고에요ㅕ</div>
+      <div class="chat-bubble">노래가계속머리에멤돌아요</div>
+      <div class="chat-bubble">들어도 들어도 안질림</div>
+      <div class="chat-bubble">와!</div>
+      <div class="chat-bubble user">미쳤다!!</div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="여러분의 의견은 어떠신가요..." />
+      <button onclick="sendChat()">⮞</button>
+    </div>
+  </div>
+</div>
+  </section>
+
+  <div id="modal">
+    <div id="modal-content">
+      <img src="img/modal_menu.png" alt="모달 이미지" />
+      <button id="close-modal">X</button>
+    </div>
+  </div>
+  <!-- 플레이리스트 전용 모달 -->
+  <div id="playlist-modal">
+    <div class="playlist-modal-content">
+      <img id="playlist-modal-img" src="" alt="플레이리스트 모달 이미지" />
+      <button id="close-playlist-modal">X</button>
+    </div>
+  </div>
+
+<script>
+  // 메뉴 클릭 스크롤, 활성화
+  document.querySelectorAll('.menu-images > button').forEach(el => {
+    el.addEventListener('click', () => {
+      const targetId = el.getAttribute('data-target');
+      const targetSection = document.getElementById(targetId);
+
+      if (el.id === 'menu-menuba') {
+        openModal(document.getElementById('modal'));
+        return;
+      }
+
+      if (targetSection) {
+        targetSection.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      document.querySelectorAll('.menu-images > button').forEach(menu => menu.classList.remove('active'));
+      document.getElementById('logo').classList.remove('active');
+      el.classList.add('active');
+    });
+  });
+
+  // 모달 열기 함수
+  function openModal(modal) {
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';  // 스크롤 막기
+  }
+
+  // 모달 닫기 함수
+  function closeModal(modal) {
+    modal.classList.remove('show');
+    document.body.style.overflow = '';  // 스크롤 풀기
+  }
+
+  // 메뉴바 모달 닫기
+  document.getElementById('close-modal').addEventListener('click', () => {
+    closeModal(document.getElementById('modal'));
+  });
+
+  // ESC키로 메뉴바 모달 닫기
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeModal(document.getElementById('modal'));
+    }
+  });
+
+  // 로고 클릭 시 최상단 스크롤 및 활성화
+  const logo = document.getElementById('logo');
+  logo.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelectorAll('.menu-images > button').forEach(menu => menu.classList.remove('active'));
+    logo.classList.add('active');
+  });
+
+  // 캐로셀 회전목마
+  const carousel = document.getElementById('carousel');
+  const items = carousel.querySelectorAll('.carousel-item');
+  let currentIndex = 0;
+
+  function updateCarousel() {
+    items.forEach((item, idx) => {
+      item.classList.remove('active', 'left', 'right', 'hidden');
+
+      if (idx === currentIndex) {
+        item.classList.add('active');
+      } else if (idx === (currentIndex + 1) % items.length) {
+        item.classList.add('right');
+      } else if (idx === (currentIndex - 1 + items.length) % items.length) {
+        item.classList.add('left');
+      } else {
+        item.classList.add('hidden');
+      }
+    });
+  }
+  updateCarousel();
+
+  items.forEach((item, idx) => {
+    item.addEventListener('click', () => {
+      if (idx !== currentIndex) {
+        currentIndex = idx;
+        updateCarousel();
+      }
+    });
+  });
+
+  // 반원형 캐로셀 - music 섹션 전용
+  const circleItems = document.querySelectorAll('.circle-item');
+  const circlePositions = [
+    { x: -180, y: 240, angle: -40 },
+    { x: 100, y: 80, angle: -20 },
+    { x: 500, y: 0, angle: 0 }, // center
+    { x: 900, y: 80, angle: 20 },
+    { x: 1180, y: 240, angle: 40 }
+  ];
+  let circleCenterIndex = Math.floor(circleItems.length / 2);
+
+  function updateCircleCarousel() {
+    const offset = 2 - circleCenterIndex;
+    const ordered = [...circleItems].map((_, i) =>
+      circleItems[(i + circleCenterIndex - 2 + circleItems.length) % circleItems.length]
+    );
+
+    ordered.forEach((el, i) => {
+      const pos = circlePositions[i];
+      el.classList.remove('center');
+      el.style.transform = `translate(${pos.x}px, ${pos.y}px) rotate(${pos.angle}deg)`;
+      el.style.zIndex = i === 2 ? 3 : 1;
+    });
+
+    ordered[2].classList.add('center');
+  }
+
+  circleItems.forEach((item, i) => {
+    item.addEventListener('click', () => {
+      circleCenterIndex = i;
+      updateCircleCarousel();
+    });
+  });
+
+  updateCircleCarousel();
+
+  // 채팅 입력 기능
+  function sendChat() {
+    const input = document.getElementById("chatInput");
+    const message = input.value.trim();
+
+    if (message) {
+      const chatMessages = document.getElementById("chatMessages");
+      const bubble = document.createElement("div");
+      bubble.className = "chat-bubble user";
+      bubble.innerText = message;
+      chatMessages.appendChild(bubble);
+      input.value = "";
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  }
+
+  // 엔터키 입력 이벤트는 별도로 한 번만 등록
+  document.getElementById("chatInput").addEventListener("keyup", function(e) {
+    if (e.key === "Enter") {
+      sendChat();
+    }
+  });
+
+  // 플레이리스트 썸네일 클릭 시 모달 띄우기
+  const playlistThumbs = document.querySelectorAll(".playlist-thumb");
+  const playlistModal = document.getElementById("playlist-modal");
+  const playlistModalImg = document.getElementById("playlist-modal-img");
+
+  playlistThumbs.forEach(thumb => {
+    thumb.addEventListener("click", () => {
+      const index = thumb.getAttribute("data-index");
+      const modalImgSrc = `img/modal_${index}.png`; // 예: modal_3.png
+      playlistModalImg.src = modalImgSrc;
+      openModal(playlistModal);
+    });
+  });
+
+  // 플레이리스트 모달 닫기 버튼
+  document.getElementById("close-playlist-modal").addEventListener("click", () => {
+    closeModal(playlistModal);
+  });
+
+  // ESC키로 플레이리스트 모달 닫기
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeModal(playlistModal);
+    }
+  });
+</script>
+
+</body>
+</html>
